@@ -14,9 +14,10 @@ class DualStreamU_eu:
     pool_size: int = 2
     starting_channels: int = 32
     fusion_neurons: int = 32
+    dilation: int = 2
+    prediction_mode: str = "Cartesian_coordinates"
     name: str | None = None
     seed: int = 777
-    dilation: int = 2
     model: tf.keras.Model | None = field(default=None, init=False, repr=False)
     vol_shape: tuple = field(init=False)
     shape_feat_shape: tuple = field(init=False)
@@ -90,8 +91,15 @@ class DualStreamU_eu:
         fusion = layers.BatchNormalization(name='fusion_bn2')(fusion)
         fusion = layers.Activation('relu', name='fusion_relu1')(fusion)
 
-        x = layers.Dense(self.num_angles * 2 , kernel_initializer=dense_init)(fusion)
-        output = layers.Lambda(self.normalize_sin_cos)(x)
+        if self.prediction_mode == "Cartesian_coordinates":
+            x = layers.Dense(self.num_angles * 2 , kernel_initializer=dense_init)(fusion)
+            output = layers.Lambda(self.normalize_sin_cos)(x)
+        elif self.prediction_mode == "Normalised_angles":
+            x = layers.Dense(self.num_angles, activation='sigmoid', kernel_initializer=dense_init)(fusion)
+            output = x
+        else:
+            raise Exception("Unknown prediction mode, please choose between Cartesian_coordinates or Normalised_angles.")
+
 
         self.model = tf.keras.Model(inputs=[vol_input, shape_input], outputs=output)
         return self.model
