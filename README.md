@@ -1,4 +1,4 @@
-# Models used in: {Title manuscript}
+# Models used in: Automated beam-angle optimisation in IMPT comparing patient-specific deep learning predictions versus population-based class solution
 This repo contains the model and the parameters used for the manuscipt {title manuscript} in the journal phiRO (DOI:).
 Final model parameters have been set as default. 
 
